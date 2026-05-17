@@ -501,6 +501,38 @@
     .data-btns { display: flex; flex-direction: column; gap: 8px; padding: 0 14px 14px; }
     .data-btn { width: 100%; justify-content: flex-start; gap: 10px; font-size: 13.5px; }
 
+    /* カスタムカテゴリチップ */
+    .chip-del {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; margin-left: 5px;
+      background: rgba(0,0,0,.12); border-radius: 50%;
+      font-size: 9px; cursor: pointer;
+    }
+    .chip.on .chip-del { background: rgba(255,255,255,.3); }
+    .chip-add {
+      border-style: dashed; color: var(--lav);
+      border-color: var(--lav-mid); background: var(--lav-pale);
+    }
+    /* カテゴリ追加モーダル */
+    #cat-modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(74,63,92,.52);
+      z-index: 300; display: none;
+      align-items: flex-end; padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    #cat-modal-bg.on { display: flex; animation: fadein .2s; }
+    .emoji-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .emoji-btn {
+      width: 42px; height: 42px; border-radius: var(--r-sm);
+      border: 2px solid var(--border); background: var(--white);
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--tr);
+    }
+    .emoji-btn.on { border-color: var(--lav); background: var(--lav-pale); }
+    .emoji-btn:active { transform: scale(.9); }
+
     /* ===== UTILS ===== */
     .sp8  { height: 8px; }
     .sp14 { height: 14px; }
@@ -541,6 +573,22 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- カテゴリ追加モーダル -->
+<div id="cat-modal-bg" onclick="closeCatModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-ttl">カテゴリを追加するわ</div>
+    <div class="modal-desc" style="margin-bottom:12px;">絵文字を選んで名前を入力してちょうだい</div>
+    <div class="emoji-grid" id="emoji-grid"></div>
+    <input type="text" class="finp" id="cat-name-inp"
+      placeholder="例：おつまみ、作り置き…" maxlength="12"
+      style="margin-bottom:16px;">
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeCatModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveNewCat()">追加する</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div id="modal-bg" onclick="closeModal()">
   <div class="modal-card" onclick="event.stopPropagation()">
@@ -559,6 +607,7 @@
    ========================================== */
 const CATS = [
   { id:'all',    e:'🍽️', l:'すべて'    },
+  { id:'メイン', e:'🥘', l:'メイン'    },
   { id:'主菜',   e:'🍖', l:'主菜'      },
   { id:'副菜',   e:'🥗', l:'副菜'      },
   { id:'汁物',   e:'🍲', l:'汁物・スープ'},
@@ -568,7 +617,8 @@ const CATS = [
   { id:'ドリンク',e:'🥤',l:'ドリンク'  },
   { id:'その他', e:'✨', l:'その他'    },
 ];
-const CAT_E = Object.fromEntries(CATS.slice(1).map(c=>[c.id, c.e]));
+function allCats() { return [...CATS, ...S.customCats]; }
+function getCatE(id) { return allCats().find(c=>c.id===id)?.e || '🍽️'; }
 
 const SAMPLES = [
   {
@@ -651,6 +701,7 @@ let S = {
   q: '',
   cat: 'all',
   detId: null,
+  customCats: [],
   editId: null,
 };
 
@@ -668,6 +719,12 @@ function load() {
 }
 function save() {
   try { localStorage.setItem('kiri-v2', JSON.stringify(S.recipes)); } catch(e){}
+}
+function loadCats() {
+  try { S.customCats = JSON.parse(localStorage.getItem('kiri-custom-cats') || '[]'); } catch(e){ S.customCats=[]; }
+}
+function saveCats() {
+  try { localStorage.setItem('kiri-custom-cats', JSON.stringify(S.customCats)); } catch(e){}
 }
 
 /* ==========================================
@@ -874,10 +931,12 @@ function pgHome() {
    ========================================== */
 function pgList() {
   const list = filtered();
-  const chips = CATS.map(c=>`
-    <button class="chip ${S.cat===c.id?'on':''}" onclick="setCat('${c.id}')">
-      ${c.e} ${c.l}
-    </button>`).join('');
+  const chips = allCats().map(c=>{
+    const isCustom = c.custom;
+    return `<button class="chip ${S.cat===c.id?'on':''}" onclick="setCat('${c.id}')">
+      ${c.e} ${c.l}${isCustom ? `<span class="chip-del" onclick="event.stopPropagation();cfmDelCat('${c.id}')">✕</span>` : ''}
+    </button>`;
+  }).join('') + `<button class="chip chip-add" onclick="openCatModal()">＋ カテゴリ追加</button>`;
 
   const body = list.length
     ? list.map(rCard).join('')
@@ -943,7 +1002,7 @@ function pgFavs() {
 function pgDetail() {
   const r = getR(S.detId);
   if (!r) return `<div class="empty"><div class="empty-ttl">見つからないわ😿</div></div>`;
-  const ce = CAT_E[r.category] || '🍽️';
+  const ce = getCatE(r.category);
 
   const ings = r.ingredients?.length
     ? r.ingredients.map(i=>`
@@ -1027,7 +1086,7 @@ function pgForm() {
   const ings = r?.ingredients?.length ? r.ingredients : [{name:'',amount:''},{name:'',amount:''}];
   const stps = r?.steps?.filter(s=>s.trim()).length ? r.steps.filter(s=>s.trim()) : ['',''];
 
-  const catOpts = CATS.slice(1).map(c=>
+  const catOpts = allCats().slice(1).map(c=>
     `<option value="${c.id}" ${r?.category===c.id?'selected':''}>${c.e} ${c.l}</option>`
   ).join('');
 
@@ -1260,7 +1319,7 @@ function closeModal() {
    SHARED HTML HELPERS
    ========================================== */
 function rCard(r) {
-  const ce = CAT_E[r.category] || '🍽️';
+  const ce = getCatE(r.category);
   return `<div class="rcard" onclick="go('detail',{id:${r.id}})">
     <div class="card-ico">${ce}</div>
     <div class="card-body">
@@ -1287,6 +1346,61 @@ function emptyState(pose, ttl, desc, action='') {
 /* ==========================================
    UTILS
    ========================================== */
+/* ==========================================
+   CUSTOM CATEGORIES
+   ========================================== */
+const CAT_EMOJIS = ['🥘','🍜','🍣','🥩','🥪','🍕','🍛','🫕','🥗','🍱',
+                    '🍰','🧁','🥤','🫖','🧆','🥚','🥞','🍙','🥟','🫙'];
+let _selEmoji = '🥘';
+
+function openCatModal() {
+  _selEmoji = CAT_EMOJIS[0];
+  const grid = document.getElementById('emoji-grid');
+  grid.innerHTML = CAT_EMOJIS.map(e =>
+    `<button class="emoji-btn ${e===_selEmoji?'on':''}" onclick="selEmoji('${e}',this)">${e}</button>`
+  ).join('');
+  document.getElementById('cat-name-inp').value = '';
+  document.getElementById('cat-modal-bg').classList.add('on');
+  setTimeout(() => document.getElementById('cat-name-inp').focus(), 100);
+}
+
+function selEmoji(e, btn) {
+  _selEmoji = e;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function closeCatModal() {
+  document.getElementById('cat-modal-bg').classList.remove('on');
+}
+
+function saveNewCat() {
+  const name = document.getElementById('cat-name-inp')?.value.trim();
+  if (!name) { toast('カテゴリ名を入力してちょうだい！'); return; }
+  if (allCats().some(c => c.id === name)) { toast('同じ名前のカテゴリがあるわ'); return; }
+  S.customCats.push({ id: name, e: _selEmoji, l: name, custom: true });
+  saveCats();
+  closeCatModal();
+  toast(`✅ 「${_selEmoji} ${name}」を追加したわ！`);
+  if (S.page === 'list') render();
+}
+
+function cfmDelCat(id) {
+  const cat = S.customCats.find(c => c.id === id);
+  if (!cat) return;
+  document.getElementById('m-ttl').textContent = 'カテゴリを削除する？';
+  document.getElementById('m-desc').textContent = `「${cat.e} ${cat.l}」を削除するわ。レシピのカテゴリは残るから安心してね。`;
+  document.getElementById('m-ok').onclick = () => {
+    S.customCats = S.customCats.filter(c => c.id !== id);
+    saveCats();
+    if (S.cat === id) S.cat = 'all';
+    closeModal();
+    toast('🗑️ カテゴリを削除したわ');
+    render();
+  };
+  document.getElementById('modal-bg').classList.add('on');
+}
+
 /* ==========================================
    EXPORT / IMPORT
    ========================================== */
@@ -1357,6 +1471,7 @@ function toast(msg) {
    BOOT
    ========================================== */
 load();
+loadCats();
 render();
 </script>
 </body>
