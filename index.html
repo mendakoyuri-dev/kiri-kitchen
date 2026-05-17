@@ -440,6 +440,21 @@
     }
     .del-btn:active { transform: scale(.88); }
     .step-irow .del-btn { margin-top: 11px; }
+    /* 並び替えボタン */
+    .step-sort {
+      display: flex; flex-direction: column; gap: 3px;
+      flex-shrink: 0; margin-top: 8px;
+    }
+    .sort-btn {
+      width: 28px; height: 28px; border-radius: var(--r-xs);
+      border: none; background: var(--lav-pale); color: var(--lav);
+      font-size: 13px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all var(--tr); -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+    }
+    .sort-btn:active { background: var(--lav-light); transform: scale(.9); }
+    .sort-btn:disabled { opacity: .3; cursor: default; transform: none; }
     .add-row {
       display: flex; align-items: center; gap: 8px;
       padding: 10px 15px; margin-top: 8px;
@@ -1124,12 +1139,7 @@ function pgForm() {
       <button class="del-btn" onclick="this.parentElement.remove()">✕</button>
     </div>`).join('');
 
-  const stpHTML = stps.map((s,i)=>`
-    <div class="step-irow" id="sr-${i}">
-      <div class="step-nb">${i+1}</div>
-      <textarea class="ftxt" placeholder="手順${i+1}を入力…" oninput="growTxt(this)">${esc(s)}</textarea>
-      <button class="del-btn" onclick="this.parentElement.remove();renumSteps()">✕</button>
-    </div>`).join('');
+  const stpHTML = stps.map((s,i)=> stepRowHTML(i, s, i===0, i===stps.length-1)).join('');
 
   const bubble = r
     ? 'このレシピをもっと\n美味しくアップデートしようにゃ！✏️'
@@ -1210,22 +1220,65 @@ function addIng() {
   row.querySelector('.ing-n').focus();
 }
 
+function stepRowHTML(i, val='', isFirst=false, isLast=false) {
+  return `<div class="step-irow">
+    <div class="step-nb">${i+1}</div>
+    <textarea class="ftxt" placeholder="手順${i+1}を入力…" oninput="growTxt(this)">${val}</textarea>
+    <div class="step-sort">
+      <button class="sort-btn" onclick="moveStep(this,-1)" ${isFirst?'disabled':''} title="上へ">▲</button>
+      <button class="sort-btn" onclick="moveStep(this,1)"  ${isLast ?'disabled':''} title="下へ">▼</button>
+    </div>
+    <button class="del-btn" onclick="this.parentElement.remove();renumSteps()" style="margin-top:11px;">✕</button>
+  </div>`;
+}
+
 function addStep() {
   const list = document.getElementById('step-list');
-  const idx = list.children.length + 1;
-  const row = document.createElement('div');
-  row.className = 'step-irow';
-  row.innerHTML = `
-    <div class="step-nb">${idx}</div>
-    <textarea class="ftxt" placeholder="手順${idx}を入力…" oninput="growTxt(this)"></textarea>
-    <button class="del-btn" onclick="this.parentElement.remove();renumSteps()">✕</button>`;
-  list.appendChild(row);
-  row.querySelector('textarea').focus();
+  const total = list.children.length;
+  // 今の最後のボタンの「下へ」を有効化
+  if (total > 0) {
+    list.lastElementChild.querySelector('.sort-btn:last-of-type').disabled = false;
+  }
+  const div = document.createElement('div');
+  div.innerHTML = stepRowHTML(total, '', total===0, true);
+  list.appendChild(div.firstElementChild);
+  list.lastElementChild.querySelector('textarea').focus();
+}
+
+function moveStep(btn, dir) {
+  const row = btn.closest('.step-irow');
+  const list = document.getElementById('step-list');
+  const rows = [...list.children];
+  const idx = rows.indexOf(row);
+  const target = rows[idx + dir];
+  if (!target) return;
+  // テキストだけ入れ替える（アニメーション付き）
+  const ta = row.querySelector('textarea');
+  const tb = target.querySelector('textarea');
+  const tmp = ta.value;
+  ta.style.transition = 'opacity .15s';
+  tb.style.transition = 'opacity .15s';
+  ta.style.opacity = '0';
+  tb.style.opacity = '0';
+  setTimeout(() => {
+    ta.value = tb.value;
+    tb.value = tmp;
+    ta.style.opacity = '1';
+    tb.style.opacity = '1';
+    renumSteps();
+  }, 150);
 }
 
 function renumSteps() {
-  document.querySelectorAll('#step-list .step-nb').forEach((el,i)=>{ el.textContent=i+1; });
-  document.querySelectorAll('#step-list textarea').forEach((el,i)=>{ el.placeholder=`手順${i+1}を入力…`; });
+  const rows = [...document.querySelectorAll('#step-list .step-irow')];
+  rows.forEach((row, i) => {
+    row.querySelector('.step-nb').textContent = i + 1;
+    const ta = row.querySelector('textarea');
+    ta.placeholder = `手順${i+1}を入力…`;
+    const [upBtn, downBtn] = row.querySelectorAll('.sort-btn');
+    upBtn.disabled   = (i === 0);
+    downBtn.disabled = (i === rows.length - 1);
+  });
 }
 
 function growTxt(el) {
