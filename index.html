@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#9575CD">
+  <title>きりねこキッチン 🐱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      --lav:       #9575CD;
+      --lav-mid:   #B39DDB;
+      --lav-light: #D1C4E9;
+      --lav-pale:  #EDE7F6;
+      --cream:     #FFFBF8;
+      --peach:     #FFF0E8;
+      --pink:      #FCE4EC;
+      --pink-mid:  #F8BBD0;
+      --green-pale:#E8F5E9;
+      --txt:       #4A3F5C;
+      --txt-mid:   #7B6F8F;
+      --txt-light: #ADA0BF;
+      --white:     #FFFFFF;
+      --border:    #E8E0F0;
+      --sh-sm:     0 2px 10px rgba(149,117,205,.14);
+      --sh-md:     0 4px 18px rgba(149,117,205,.20);
+      --r-xs: 8px; --r-sm: 12px; --r-md: 18px; --r-lg: 24px; --r-pill: 9999px;
+      --nav-h: 68px;
+      --hdr-h: 58px;
+      --tr: .22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ===== BASE ===== */
+    body {
+      font-family: 'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif;
+      background: var(--cream);
+      color: var(--txt);
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+      padding-bottom: var(--nav-h);
+    }
+
+    /* ===== HEADER ===== */
+    #hdr {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--hdr-h);
+      background: linear-gradient(120deg, var(--lav) 0%, var(--lav-mid) 100%);
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 10px;
+      box-shadow: 0 2px 12px rgba(149,117,205,.25);
+    }
+    #hdr-back {
+      display: none; width: 36px; height: 36px;
+      border: none; background: rgba(255,255,255,.22); border-radius: 50%;
+      color: #fff; font-size: 20px; cursor: pointer; align-items: center; justify-content: center;
+      transition: background var(--tr);
+    }
+    #hdr-back.on { display: flex; }
+    #hdr-back:active { background: rgba(255,255,255,.4); }
+    #hdr-title {
+      flex: 1; color: #fff; font-size: 17px; font-weight: 800;
+      letter-spacing: .02em; text-shadow: 0 1px 4px rgba(0,0,0,.12);
+    }
+    #hdr-act { display: flex; gap: 8px; }
+    .hdr-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border: none;
+      background: rgba(255,255,255,.22); border-radius: 50%;
+      color: #fff; font-size: 18px; cursor: pointer;
+      transition: background var(--tr);
+    }
+    .hdr-btn:active { background: rgba(255,255,255,.42); }
+
+    /* ===== MAIN ===== */
+    #app { min-height: calc(100vh - var(--hdr-h) - var(--nav-h)); }
+
+    /* ===== BOTTOM NAV ===== */
+    #nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; height: var(--nav-h);
+      background: var(--white);
+      border-top: 1.5px solid var(--border);
+      display: flex; align-items: center;
+      z-index: 100;
+      box-shadow: 0 -3px 14px rgba(149,117,205,.10);
+    }
+    .ni {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      padding: 6px 2px; cursor: pointer;
+      border: none; background: transparent;
+      color: var(--txt-light); font-family: inherit;
+      font-size: 9.5px; font-weight: 700;
+      transition: color var(--tr), transform var(--tr);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ni:active { transform: scale(.9); }
+    .ni.on { color: var(--lav); }
+    .ni-ico { font-size: 22px; transition: transform var(--tr); }
+    .ni.on .ni-ico { transform: scale(1.18); }
+    /* FAB center */
+    .ni-fab {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--lav) 0%, var(--lav-mid) 100%);
+      color: #fff; margin-top: -18px;
+      box-shadow: var(--sh-md);
+      font-size: 28px; flex: 0 0 auto;
+      line-height: 1;
+    }
+    .ni-fab .ni-ico { font-size: 28px; }
+    .ni-fab .ni-lbl { display: none; }
+    .ni-fab.on { background: linear-gradient(135deg, #7B60B8 0%, var(--lav) 100%); }
+
+    /* ===== PAGE ANIMATION ===== */
+    .page { animation: pgIn var(--tr); }
+    @keyframes pgIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ===== HERO BANNER ===== */
+    .hero {
+      background: linear-gradient(150deg, var(--lav-pale) 0%, var(--pink) 100%);
+      padding: 22px 16px 18px; position: relative; overflow: hidden;
+    }
+    .hero::after {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 130px; height: 130px;
+      background: radial-gradient(circle, rgba(149,117,205,.18), transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .hero-sub { font-size: 12px; color: var(--lav); font-weight: 700; margin-bottom: 3px; }
+    .hero-ttl { font-size: 21px; font-weight: 800; line-height: 1.35; margin-bottom: 18px; }
+    .hero-ttl span { color: var(--lav); }
+
+    /* ===== CHARACTER BUBBLE ===== */
+    .char-row {
+      display: flex; align-items: flex-end; gap: 12px;
+    }
+    .char-wrap { flex-shrink: 0; }
+    .char-img {
+      object-fit: contain; object-position: bottom;
+      filter: drop-shadow(0 4px 10px rgba(149,117,205,.32));
+      display: block;
+    }
+    .bubble {
+      background: var(--white); border: 1.5px solid var(--lav-light);
+      border-radius: var(--r-md) var(--r-md) var(--r-md) 4px;
+      padding: 10px 14px; font-size: 13px; font-weight: 500;
+      line-height: 1.6; color: var(--txt);
+      box-shadow: var(--sh-sm); flex: 1;
+    }
+    /* corner bubble (detail page) */
+    .char-corner {
+      display: flex; align-items: flex-end; justify-content: flex-end;
+      gap: 10px; padding: 4px 16px 16px;
+    }
+    .corner-bubble {
+      background: var(--white); border: 1.5px solid var(--lav-light);
+      border-radius: var(--r-sm) var(--r-sm) 4px var(--r-sm);
+      padding: 8px 12px; font-size: 12px; line-height: 1.5;
+      color: var(--txt); box-shadow: var(--sh-sm); max-width: 195px;
+    }
+
+    /* ===== STATS ===== */
+    .stats { display: flex; gap: 10px; padding: 14px 16px; }
+    .stat-card {
+      flex: 1; background: var(--white); border-radius: var(--r-md);
+      padding: 13px 10px; text-align: center;
+      box-shadow: var(--sh-sm); border: 1.5px solid var(--border);
+      cursor: default;
+    }
+    .stat-card.clickable { cursor: pointer; border-color: var(--lav-light); }
+    .stat-card.clickable:active { transform: scale(.97); }
+    .stat-n { font-size: 26px; font-weight: 800; color: var(--lav); line-height: 1; margin-bottom: 4px; }
+    .stat-l { font-size: 11px; color: var(--txt-mid); font-weight: 700; }
+
+    /* ===== SECTION HEADER ===== */
+    .sec-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 16px 10px;
+    }
+    .sec-ttl {
+      font-size: 14px; font-weight: 800;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sec-link {
+      font-size: 12px; color: var(--lav); font-weight: 700;
+      cursor: pointer; border: none; background: none;
+      font-family: inherit; padding: 4px 10px;
+      border-radius: var(--r-pill); transition: background var(--tr);
+    }
+    .sec-link:active { background: var(--lav-pale); }
+
+    /* ===== RECIPE CARDS ===== */
+    .cards { padding: 0 16px; display: flex; flex-direction: column; gap: 11px; }
+    .rcard {
+      background: var(--white); border-radius: var(--r-md);
+      padding: 15px; box-shadow: var(--sh-sm);
+      border: 1.5px solid var(--border);
+      cursor: pointer; display: flex; gap: 13px; align-items: flex-start;
+      transition: transform var(--tr), box-shadow var(--tr);
+      -webkit-tap-highlight-color: transparent; position: relative;
+    }
+    .rcard:active { transform: scale(.978); }
+    .card-ico {
+      width: 54px; height: 54px; border-radius: var(--r-sm);
+      background: var(--lav-pale); display: flex; align-items: center;
+      justify-content: center; font-size: 28px; flex-shrink: 0;
+    }
+    .card-body { flex: 1; min-width: 0; }
+    .card-ttl {
+      font-size: 15px; font-weight: 800; margin-bottom: 6px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 2px;
+      padding: 3px 8px; border-radius: var(--r-pill);
+      font-size: 10.5px; font-weight: 700;
+    }
+    .tag-cat  { background: var(--lav-pale);  color: var(--lav); }
+    .tag-time { background: var(--peach);      color: #B0623E; }
+    .tag-srv  { background: var(--green-pale); color: #3D7250; }
+    .fav-btn {
+      font-size: 22px; cursor: pointer; flex-shrink: 0;
+      padding: 4px; border: none; background: none;
+      transition: transform var(--tr);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fav-btn:active { transform: scale(1.4); }
+
+    /* ===== SEARCH ===== */
+    .search-area {
+      padding: 14px 16px; position: sticky; top: var(--hdr-h);
+      background: var(--cream); z-index: 90;
+    }
+    .search-box {
+      display: flex; align-items: center; height: 48px;
+      background: var(--white); border-radius: var(--r-pill);
+      padding: 0 16px; gap: 10px;
+      border: 2px solid var(--border);
+      transition: border-color var(--tr), box-shadow var(--tr);
+    }
+    .search-box:focus-within {
+      border-color: var(--lav-mid);
+      box-shadow: 0 0 0 3px rgba(149,117,205,.14);
+    }
+    .s-ico { font-size: 18px; color: var(--txt-light); flex-shrink: 0; }
+    .s-inp {
+      flex: 1; border: none; outline: none;
+      font-family: inherit; font-size: 15px;
+      color: var(--txt); background: transparent;
+    }
+    .s-inp::placeholder { color: var(--txt-light); }
+    .s-clr {
+      font-size: 16px; color: var(--txt-light); cursor: pointer;
+      border: none; background: none; padding: 4px; display: none;
+    }
+    .s-clr.on { display: block; }
+
+    /* Category chips */
+    .cat-scroll {
+      display: flex; gap: 8px; padding: 0 16px 14px;
+      overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+    .chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 7px 14px; border-radius: var(--r-pill);
+      border: 2px solid var(--border); background: var(--white);
+      font-family: inherit; font-size: 12px; font-weight: 700;
+      color: var(--txt-mid); cursor: pointer; white-space: nowrap;
+      transition: all var(--tr); -webkit-tap-highlight-color: transparent;
+    }
+    .chip:active { transform: scale(.94); }
+    .chip.on { background: var(--lav); border-color: var(--lav); color: #fff; }
+    .list-cnt { padding: 4px 16px 6px; font-size: 11.5px; color: var(--txt-light); font-weight: 700; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty {
+      text-align: center; padding: 38px 28px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .empty-ttl { font-size: 16px; font-weight: 800; }
+    .empty-desc { font-size: 13px; color: var(--txt-mid); line-height: 1.65; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 7px; padding: 12px 22px; border-radius: var(--r-pill);
+      border: none; font-family: inherit; font-size: 14px; font-weight: 800;
+      cursor: pointer; transition: all var(--tr);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(.96); }
+    .btn-primary { background: linear-gradient(130deg, var(--lav) 0%, var(--lav-mid) 100%); color: #fff; box-shadow: var(--sh-sm); }
+    .btn-ghost   { background: var(--lav-pale); color: var(--lav); }
+    .btn-danger  { background: var(--pink); color: #B04060; }
+    .btn-w { width: 100%; }
+
+    /* ===== DETAIL PAGE ===== */
+    .det-hero {
+      background: linear-gradient(150deg, var(--lav-pale) 0%, var(--pink) 100%);
+      padding: 18px 16px 20px;
+    }
+    /* 誇らしげ桐ねこ（右側） */
+    .det-main-row { display: flex; gap: 12px; align-items: center; }
+    .proud-wrap {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .proud-bubble {
+      background: var(--white); border: 1.5px solid var(--lav-light);
+      border-radius: var(--r-md) var(--r-md) 4px var(--r-md);
+      padding: 8px 12px; font-size: 12.5px; font-weight: 700;
+      line-height: 1.65; color: var(--txt); box-shadow: var(--sh-sm);
+      text-align: center; position: relative; white-space: nowrap;
+    }
+    .proud-bubble::after {
+      content: '';
+      position: absolute; bottom: -9px; right: 18px;
+      border: 5px solid transparent;
+      border-top-color: var(--lav-light);
+    }
+    .proud-bubble::before {
+      content: '';
+      position: absolute; bottom: -7px; right: 19px;
+      border: 4px solid transparent;
+      border-top-color: var(--white);
+      z-index: 1;
+    }
+    .det-ico {
+      width: 78px; height: 78px; border-radius: var(--r-md);
+      background: var(--white); display: flex; align-items: center;
+      justify-content: center; font-size: 38px; flex-shrink: 0;
+      box-shadow: var(--sh-sm);
+    }
+    .det-info { flex: 1; }
+    .det-ttl { font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+    .det-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .det-body { padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .dsec {
+      background: var(--white); border-radius: var(--r-md);
+      padding: 15px; box-shadow: var(--sh-sm); border: 1.5px solid var(--border);
+    }
+    .dsec-ttl {
+      font-size: 13.5px; font-weight: 800; color: var(--lav);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+    .ing-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+    }
+    .ing-row:last-child { border-bottom: none; }
+    .ing-name { font-size: 14px; font-weight: 500; }
+    .ing-amt  { font-size: 13px; color: var(--txt-mid); font-weight: 700; }
+    .step-row { display: flex; gap: 12px; margin-bottom: 13px; }
+    .step-row:last-child { margin-bottom: 0; }
+    .step-n {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--lav); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; flex-shrink: 0;
+    }
+    .step-txt { flex: 1; font-size: 14px; line-height: 1.7; padding-top: 4px; }
+    .memo-txt { font-size: 14px; line-height: 1.7; color: var(--txt-mid); }
+    .det-actions { display: flex; gap: 12px; padding: 0 16px 8px; }
+    .det-actions .btn { flex: 1; }
+
+    /* ===== FORM ===== */
+    .form-hdr {
+      background: var(--lav-pale); padding: 15px 16px;
+      display: flex; gap: 12px; align-items: center;
+    }
+    .form-body { padding: 18px 16px; display: flex; flex-direction: column; gap: 15px; }
+    .fg { display: flex; flex-direction: column; gap: 7px; }
+    .flbl {
+      font-size: 13px; font-weight: 800; color: var(--txt);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .req { color: #E57373; font-size: 11px; }
+    .finp, .fsel, .ftxt {
+      width: 100%; padding: 12px 15px;
+      border: 2px solid var(--border); border-radius: var(--r-sm);
+      font-family: inherit; font-size: 15px; color: var(--txt);
+      background: var(--white); outline: none;
+      transition: border-color var(--tr), box-shadow var(--tr);
+      -webkit-appearance: none;
+    }
+    .finp:focus, .fsel:focus, .ftxt:focus {
+      border-color: var(--lav-mid);
+      box-shadow: 0 0 0 3px rgba(149,117,205,.14);
+    }
+    .ftxt { resize: vertical; min-height: 80px; line-height: 1.65; }
+    .frow { display: flex; gap: 12px; }
+    .frow .fg { flex: 1; }
+    /* Ingredient rows */
+    .ing-list, .step-list { display: flex; flex-direction: column; gap: 8px; }
+    .ing-irow { display: flex; gap: 7px; align-items: center; }
+    .ing-irow .finp:first-of-type { flex: 2; }
+    .ing-irow .finp:last-of-type  { flex: 1; }
+    .step-irow { display: flex; gap: 9px; align-items: flex-start; }
+    .step-nb {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--lav-light); color: var(--lav);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 11px;
+    }
+    .step-irow .ftxt { flex: 1; min-height: 68px; }
+    .del-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: none; background: var(--pink); color: #B04060;
+      font-size: 16px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+      transition: transform var(--tr); -webkit-tap-highlight-color: transparent;
+    }
+    .del-btn:active { transform: scale(.88); }
+    .step-irow .del-btn { margin-top: 11px; }
+    .add-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 15px; margin-top: 8px;
+      border: 2px dashed var(--lav-mid); border-radius: var(--r-sm);
+      background: var(--lav-pale); color: var(--lav);
+      font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background var(--tr);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-row:active { background: var(--lav-light); }
+    .form-footer { display: flex; gap: 12px; padding-bottom: 8px; }
+    .form-footer .btn { flex: 1; }
+
+    /* ===== FAVORITES HERO ===== */
+    .fav-hero {
+      background: linear-gradient(150deg, var(--pink) 0%, var(--lav-pale) 100%);
+      padding: 18px 16px; display: flex; align-items: center; gap: 14px;
+    }
+    .fav-hero-txt h2 { font-size: 18px; font-weight: 800; margin-bottom: 3px; }
+    .fav-hero-txt p  { font-size: 13px; color: var(--txt-mid); }
+
+    /* ===== TOAST ===== */
+    #toast {
+      position: fixed; bottom: calc(var(--nav-h) + 14px);
+      left: 50%; transform: translateX(-50%) translateY(18px);
+      background: #3D3252; color: #fff;
+      padding: 11px 20px; border-radius: var(--r-pill);
+      font-size: 13px; font-weight: 700; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: all .28s cubic-bezier(.4,0,.2,1);
+      z-index: 999; max-width: calc(100% - 32px);
+    }
+    #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== MODAL ===== */
+    #modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(74,63,92,.52);
+      z-index: 200; display: none;
+      align-items: flex-end; padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    #modal-bg.on { display: flex; animation: fadein .2s; }
+    @keyframes fadein { from { opacity:0; } to { opacity:1; } }
+    .modal-card {
+      background: var(--white); border-radius: var(--r-lg);
+      padding: 24px; width: 100%; text-align: center;
+      animation: slideup .24s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes slideup { from { transform:translateY(40px); } to { transform:translateY(0); } }
+    .modal-ttl { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+    .modal-desc { font-size: 13.5px; color: var(--txt-mid); line-height: 1.65; margin-bottom: 20px; }
+    .modal-acts { display: flex; gap: 12px; }
+    .modal-acts .btn { flex: 1; }
+
+    /* ===== DATA SHARE SECTION ===== */
+    .data-section {
+      margin: 0 16px;
+      background: var(--white);
+      border-radius: var(--r-md);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--sh-sm);
+      overflow: hidden;
+    }
+    .data-desc {
+      display: flex; align-items: center; gap: 10px;
+      padding: 4px 16px 12px;
+      font-size: 12.5px; color: var(--txt-mid); line-height: 1.65;
+    }
+    .data-btns { display: flex; flex-direction: column; gap: 8px; padding: 0 14px 14px; }
+    .data-btn { width: 100%; justify-content: flex-start; gap: 10px; font-size: 13.5px; }
+
+    /* ===== UTILS ===== */
+    .sp8  { height: 8px; }
+    .sp14 { height: 14px; }
+    .pad16 { padding: 0 16px; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="hdr">
+  <button id="hdr-back" onclick="goBack()">←</button>
+  <div id="hdr-title">きりねこキッチン 🍳</div>
+  <div id="hdr-act"></div>
+</header>
+
+<!-- MAIN -->
+<main id="app"></main>
+
+<!-- BOTTOM NAV -->
+<nav id="nav">
+  <button class="ni on" id="ni-home" onclick="go('home')">
+    <span class="ni-ico">🏠</span><span class="ni-lbl">ホーム</span>
+  </button>
+  <button class="ni" id="ni-list" onclick="go('list')">
+    <span class="ni-ico">📖</span><span class="ni-lbl">レシピ</span>
+  </button>
+  <button class="ni ni-fab" id="ni-add" onclick="go('form')">
+    <span class="ni-ico">＋</span>
+  </button>
+  <button class="ni" id="ni-favs" onclick="go('favorites')">
+    <span class="ni-ico">❤️</span><span class="ni-lbl">お気に入り</span>
+  </button>
+  <button class="ni" id="ni-search" onclick="gotoSearch()">
+    <span class="ni-ico">🔍</span><span class="ni-lbl">検索</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div id="modal-bg" onclick="closeModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-ttl" id="m-ttl"></div>
+    <div class="modal-desc" id="m-desc"></div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-danger" id="m-ok">削除する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================
+   DATA
+   ========================================== */
+const CATS = [
+  { id:'all',    e:'🍽️', l:'すべて'    },
+  { id:'主菜',   e:'🍖', l:'主菜'      },
+  { id:'副菜',   e:'🥗', l:'副菜'      },
+  { id:'汁物',   e:'🍲', l:'汁物・スープ'},
+  { id:'スイーツ',e:'🍰',l:'スイーツ'  },
+  { id:'朝食',   e:'🍳', l:'朝食'      },
+  { id:'お弁当', e:'🍱', l:'お弁当'    },
+  { id:'ドリンク',e:'🥤',l:'ドリンク'  },
+  { id:'その他', e:'✨', l:'その他'    },
+];
+const CAT_E = Object.fromEntries(CATS.slice(1).map(c=>[c.id, c.e]));
+
+const SAMPLES = [
+  {
+    id:1, title:'肉じゃが', category:'主菜', servings:4, cookTime:35,
+    isFavorite:true, createdAt: Date.now()-86400000*5,
+    ingredients:[
+      {name:'牛肉（薄切り）',amount:'200g'},{name:'じゃがいも',amount:'3個'},
+      {name:'にんじん',amount:'1本'},{name:'玉ねぎ',amount:'1個'},
+      {name:'醤油',amount:'大さじ3'},{name:'みりん',amount:'大さじ3'},
+      {name:'砂糖',amount:'大さじ2'},{name:'だし汁',amount:'300ml'},
+    ],
+    steps:[
+      'じゃがいも・にんじん・玉ねぎを食べやすい大きさに切る',
+      '鍋に油を熱し、牛肉を炒める',
+      '野菜を加えてさらに炒める',
+      'だし汁を加えて煮立てる',
+      '調味料を加えて蓋をし、中火で15分煮る',
+      '蓋を取り、汁気が少なくなるまで煮詰めたら完成！',
+    ],
+    memo:'じゃがいもは煮崩れしやすいので大きめに切るのがコツ。翌日も美味しい！',
+  },
+  {
+    id:2, title:'だし巻き卵', category:'副菜', servings:2, cookTime:15,
+    isFavorite:false, createdAt: Date.now()-86400000*3,
+    ingredients:[
+      {name:'卵',amount:'3個'},{name:'だし汁',amount:'50ml'},
+      {name:'醤油',amount:'小さじ½'},{name:'みりん',amount:'小さじ1'},
+      {name:'塩',amount:'少々'},
+    ],
+    steps:[
+      '卵をよく溶きほぐし、だし汁・醤油・みりん・塩を加えて混ぜる',
+      '卵焼き器を熱し、サラダ油を薄く引く',
+      '卵液の⅓を流し入れ、半熟になったら手前に巻く',
+      '残りの卵液を2回に分けて同様に焼く',
+      '形を整え、切り分けたら完成！大根おろしを添えてどうぞ',
+    ],
+    memo:'だし汁の量が多いほどふわふわに。急がず弱火でじっくり焼くのがポイント！',
+  },
+  {
+    id:3, title:'ふわふわパンケーキ', category:'スイーツ', servings:2, cookTime:20,
+    isFavorite:true, createdAt: Date.now()-86400000*1,
+    ingredients:[
+      {name:'ホットケーキミックス',amount:'150g'},{name:'卵',amount:'1個'},
+      {name:'牛乳',amount:'100ml'},{name:'バター',amount:'適量'},
+    ],
+    steps:[
+      'ボウルに卵と牛乳を入れてよく混ぜる',
+      'ホットケーキミックスを加えてさっくり混ぜる（混ぜすぎない！）',
+      'フライパンを弱火で温め、バターを溶かす',
+      '生地を流し入れ、泡が出てきたら裏返す',
+      '弱火でじっくり焼いて完成。メープルシロップをたっぷりかけて♪',
+    ],
+    memo:'生地を混ぜすぎないのがふわふわのコツ！少し粉っぽくても大丈夫。',
+  },
+  {
+    id:4, title:'野菜たっぷりみそ汁', category:'汁物', servings:4, cookTime:15,
+    isFavorite:false, createdAt: Date.now()-86400000*7,
+    ingredients:[
+      {name:'だし汁',amount:'800ml'},{name:'みそ',amount:'大さじ3'},
+      {name:'豆腐',amount:'½丁'},{name:'わかめ（乾燥）',amount:'大さじ1'},
+      {name:'ねぎ',amount:'適量'},{name:'じゃがいも',amount:'1個'},
+    ],
+    steps:[
+      'じゃがいもは一口大に切り、だし汁で煮る',
+      'じゃがいもが柔らかくなったら豆腐・わかめを加える',
+      'みそを溶き入れ、沸騰直前で火を止める',
+      'ねぎを散らして完成！',
+    ],
+    memo:'みそを入れたら沸騰させないのが美味しさのポイント。',
+  },
+];
+
+/* ==========================================
+   STATE
+   ========================================== */
+let S = {
+  page: 'home',
+  prev: null,
+  recipes: [],
+  q: '',
+  cat: 'all',
+  detId: null,
+  editId: null,
+};
+
+/* ==========================================
+   STORAGE
+   ========================================== */
+function load() {
+  try {
+    const d = localStorage.getItem('kiri-v2');
+    S.recipes = d ? JSON.parse(d) : SAMPLES.map(r=>({...r}));
+    if (!d) save();
+  } catch(e) {
+    S.recipes = SAMPLES.map(r=>({...r}));
+  }
+}
+function save() {
+  try { localStorage.setItem('kiri-v2', JSON.stringify(S.recipes)); } catch(e){}
+}
+
+/* ==========================================
+   CRUD
+   ========================================== */
+function addR(data) {
+  const r = { id: Date.now(), isFavorite: false, createdAt: Date.now(), ...data };
+  S.recipes.unshift(r); save(); return r;
+}
+function updR(id, data) {
+  const i = S.recipes.findIndex(r=>r.id===id);
+  if (i!==-1) { S.recipes[i] = {...S.recipes[i], ...data, updatedAt:Date.now()}; save(); }
+}
+function delR(id) { S.recipes = S.recipes.filter(r=>r.id!==id); save(); }
+function togFav(id) {
+  const r = S.recipes.find(r=>r.id===id);
+  if (r) { r.isFavorite = !r.isFavorite; save(); return r.isFavorite; }
+}
+function getR(id) { return S.recipes.find(r=>r.id===id); }
+
+/* ==========================================
+   FILTER
+   ========================================== */
+function filtered() {
+  let l = [...S.recipes];
+  if (S.cat !== 'all') l = l.filter(r=>r.category===S.cat);
+  if (S.q) {
+    const q = S.q.toLowerCase();
+    l = l.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      (r.category||'').toLowerCase().includes(q) ||
+      (r.ingredients||[]).some(i=>i.name.toLowerCase().includes(q)) ||
+      (r.memo||'').toLowerCase().includes(q) ||
+      (r.steps||[]).some(s=>s.toLowerCase().includes(q))
+    );
+  }
+  return l;
+}
+
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+function go(page, params={}) {
+  S.prev = S.page; S.page = page;
+  if (params.id !== undefined) {
+    if (page==='detail') S.detId = params.id;
+    if (page==='form')   S.editId = params.id;
+  }
+  if (page==='form' && params.id === undefined) S.editId = null;
+  render();
+}
+function goBack() {
+  if (S.prev) { const p=S.prev; S.prev=null; S.page=p; render(); }
+  else go('home');
+}
+function gotoSearch() {
+  go('list');
+  setTimeout(()=>{ const el=document.getElementById('s-inp'); if(el){el.focus(); el.scrollIntoView({behavior:'smooth'});} }, 80);
+}
+
+/* ==========================================
+   CHARACTER IMAGE HELPER
+   ========================================== */
+function kiri(pose, size=88) {
+  const em = {
+    welcome:'🐱', happy:'😺', sad:'😿', thinking:'🙀',
+    cooking:'🐾', favorite:'🐱', search:'🔍', peek:'👀'
+  };
+  return `<img
+    src="./images/kiri-${pose}.png"
+    class="char-img" width="${size}" height="${size}"
+    alt="きりねこ"
+    onerror="this.replaceWith(Object.assign(document.createElement('span'),{
+      textContent:'${em[pose]||'🐱'}',
+      style:'font-size:${Math.round(size*.72)}px;line-height:1;display:block;'
+    }))"
+  >`;
+}
+
+/* ==========================================
+   RENDER ROUTER
+   ========================================== */
+function render() {
+  updateNav(); updateHdr();
+  const app = document.getElementById('app');
+  switch(S.page) {
+    case 'home':      app.innerHTML = pgHome();     break;
+    case 'list':      app.innerHTML = pgList();     break;
+    case 'favorites': app.innerHTML = pgFavs();     break;
+    case 'detail':    app.innerHTML = pgDetail();   break;
+    case 'form':      app.innerHTML = pgForm();     break;
+  }
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function updateNav() {
+  ['ni-home','ni-list','ni-add','ni-favs','ni-search'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('on');
+  });
+  const m = {home:'ni-home', list:'ni-list', favorites:'ni-favs', form:'ni-add'};
+  if (m[S.page]) document.getElementById(m[S.page])?.classList.add('on');
+}
+
+function updateHdr() {
+  const back  = document.getElementById('hdr-back');
+  const title = document.getElementById('hdr-title');
+  const act   = document.getElementById('hdr-act');
+  const TITLES = {
+    home:'きりねこキッチン 🍳', list:'レシピ一覧 📖',
+    favorites:'お気に入り ❤️', detail:'レシピ詳細',
+    form: S.editId ? 'レシピを編集 ✏️' : 'レシピを追加 ＋',
+  };
+  title.textContent = TITLES[S.page] || '';
+  back.classList.toggle('on', ['detail','form'].includes(S.page));
+  if (S.page==='detail' && S.detId) {
+    const r = getR(S.detId);
+    act.innerHTML = r
+      ? `<button class="hdr-btn" id="fav-hdr" onclick="hdFav(${r.id})">${r.isFavorite?'❤️':'🤍'}</button>`
+      : '';
+  } else { act.innerHTML = ''; }
+}
+
+/* ==========================================
+   PAGE: HOME
+   ========================================== */
+function pgHome() {
+  const total = S.recipes.length;
+  const favCnt = S.recipes.filter(r=>r.isFavorite).length;
+  const recent = [...S.recipes].sort((a,b)=>b.createdAt-a.createdAt).slice(0,3);
+  const h = new Date().getHours();
+  let sub, pose, msg;
+  if      (h<6)  { sub='おはよう！早起きさんね'; pose='thinking'; msg='まだ眠いんだけど…🌙<br>今日も美味しいもの作るわよ！'; }
+  else if (h<11) { sub='おはようございます！'; pose='welcome'; msg='おはようなのよ！☀️<br>今日の朝ごはん、もう決めたかしら？'; }
+  else if (h<14) { sub='こんにちは！'; pose='happy'; msg='お昼の時間だわ！🍴<br>何を作るか、一緒に探しましょ。'; }
+  else if (h<17) { sub='こんにちは！'; pose='cooking'; msg='今日の夕飯は<br>もう決まってるかしら？🐾'; }
+  else if (h<21) { sub='こんばんは！'; pose='cooking'; msg='夕食の時間よ！🍚<br>美味しいもの、一緒に作りましょ！'; }
+  else           { sub='お疲れさまでした！'; pose='welcome'; msg='今日も1日お疲れ様だったわ✨<br>明日の献立も考えておくといいわよ！'; }
+
+  const recentHTML = recent.length
+    ? recent.map(rCard).join('')
+    : `<div style="text-align:center;padding:24px;color:var(--txt-light);font-size:13px;">まだレシピがないのよ🐱<br>最初のレシピを追加してちょうだい！</div>`;
+
+  return `<div class="page">
+    <div class="hero">
+      <div class="hero-sub">${sub}</div>
+      <div class="hero-ttl">家族みんなの<br><span>きりねこキッチン</span>へようこそ！</div>
+      <div class="char-row">
+        <div class="char-wrap">${kiri(pose,90)}</div>
+        <div class="bubble">${msg}</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-n">${total}</div>
+        <div class="stat-l">📖 レシピ</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-n">${favCnt}</div>
+        <div class="stat-l">❤️ お気に入り</div>
+      </div>
+      <div class="stat-card clickable" onclick="go('form')">
+        <div class="stat-n" style="font-size:22px;">＋</div>
+        <div class="stat-l" style="color:var(--lav);">追加する</div>
+      </div>
+    </div>
+
+    <div class="sec-hdr">
+      <div class="sec-ttl">🕐 最近追加したレシピ</div>
+      <button class="sec-link" onclick="go('list')">すべて見る →</button>
+    </div>
+    <div class="cards">${recentHTML}</div>
+
+    <div class="sp14"></div>
+    <div class="pad16">
+      <button class="btn btn-primary btn-w" onclick="go('list')">📖 レシピを全部見る</button>
+    </div>
+
+    <div class="sp14"></div>
+    <div class="data-section">
+      <div class="sec-hdr" style="padding-bottom:8px;">
+        <div class="sec-ttl">📤 データ共有・バックアップ</div>
+      </div>
+      <div class="data-desc">
+        ${kiri('peek', 44)}
+        <p>スマホとパソコンでレシピを共有したいときは、<br>書き出して渡してちょうだい！</p>
+      </div>
+      <div class="data-btns">
+        <button class="btn btn-ghost data-btn" onclick="exportData()">
+          <span>📤</span> 書き出し（エクスポート）
+        </button>
+        <button class="btn btn-ghost data-btn" onclick="document.getElementById('import-input').click()">
+          <span>📥</span> 読み込み（インポート）
+        </button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+    </div>
+    <div class="sp14"></div>
+  </div>`;
+}
+
+/* ==========================================
+   PAGE: LIST
+   ========================================== */
+function pgList() {
+  const list = filtered();
+  const chips = CATS.map(c=>`
+    <button class="chip ${S.cat===c.id?'on':''}" onclick="setCat('${c.id}')">
+      ${c.e} ${c.l}
+    </button>`).join('');
+
+  const body = list.length
+    ? list.map(rCard).join('')
+    : emptyState(
+        S.q ? 'sad' : 'thinking',
+        S.q ? `「${esc(S.q)}」は見つからなかったわ😢` : 'まだレシピがないのよ！',
+        S.q ? '別のキーワードで試してみてちょうだい。\n材料名でも検索できるんだから！' : '最初のレシピを追加してちょうだいね🐱',
+        !S.q ? `<button class="btn btn-primary" onclick="go('form')">＋ レシピを追加</button>` : ''
+      );
+
+  return `<div class="page">
+    <div class="search-area">
+      <div class="search-box">
+        <span class="s-ico">🔍</span>
+        <input type="search" class="s-inp" id="s-inp"
+          placeholder="レシピ名・材料で検索…"
+          value="${esc(S.q)}"
+          oninput="hdSearch(this.value)"
+          enterkeyhint="search">
+        <button class="s-clr ${S.q?'on':''}" onclick="clrSearch()">✕</button>
+      </div>
+    </div>
+
+    <div class="cat-scroll">${chips}</div>
+
+    ${list.length ? `<div class="list-cnt">${list.length}件のレシピ</div>` : ''}
+
+    <div class="cards" id="card-list">${body}</div>
+    <div class="sp14"></div>
+  </div>`;
+}
+
+/* ==========================================
+   PAGE: FAVORITES
+   ========================================== */
+function pgFavs() {
+  const favs = S.recipes.filter(r=>r.isFavorite);
+  const body = favs.length
+    ? favs.map(rCard).join('')
+    : emptyState(
+        'sad',
+        'お気に入りがまだないのよ😿',
+        'レシピのハートをタップすれば\nお気に入りに追加できるんだから！',
+        `<button class="btn btn-primary" onclick="go('list')">📖 レシピを探す</button>`
+      );
+  return `<div class="page">
+    <div class="fav-hero">
+      ${kiri('favorite',72)}
+      <div class="fav-hero-txt">
+        <h2>❤️ お気に入り</h2>
+        <p>${favs.length}件のレシピ</p>
+      </div>
+    </div>
+    <div class="sp14"></div>
+    <div class="cards">${body}</div>
+    <div class="sp14"></div>
+  </div>`;
+}
+
+/* ==========================================
+   PAGE: DETAIL
+   ========================================== */
+function pgDetail() {
+  const r = getR(S.detId);
+  if (!r) return `<div class="empty"><div class="empty-ttl">見つからないわ😿</div></div>`;
+  const ce = CAT_E[r.category] || '🍽️';
+
+  const ings = r.ingredients?.length
+    ? r.ingredients.map(i=>`
+      <div class="ing-row">
+        <span class="ing-name">${esc(i.name)}</span>
+        <span class="ing-amt">${esc(i.amount)}</span>
+      </div>`).join('')
+    : `<p style="color:var(--txt-light);font-size:13px;">材料が登録されていません</p>`;
+
+  const steps = r.steps?.filter(s=>s.trim()).length
+    ? r.steps.filter(s=>s.trim()).map((s,i)=>`
+      <div class="step-row">
+        <div class="step-n">${i+1}</div>
+        <div class="step-txt">${esc(s)}</div>
+      </div>`).join('')
+    : `<p style="color:var(--txt-light);font-size:13px;">手順が登録されていません</p>`;
+
+  const TIPS = [
+    '美味しく作れたら❤️を押してお気に入りに登録してちょうだい！',
+    '家族みんなで一緒に作ったら楽しいんじゃないかしら🐾',
+    '新鮮な材料を使うと、もっと美味しくなるんだから✨',
+    '料理は愛情が一番の調味料なのよ🍀',
+    'お弁当にしても美味しいと思うわ！残ったらぜひ試してみて',
+    'このレシピ、みんなのお気に入りになるといいわね🌸',
+  ];
+  const tip = TIPS[r.id % TIPS.length];
+
+  return `<div class="page">
+    <div class="det-hero">
+      <div class="det-main-row">
+        <div class="det-ico">${ce}</div>
+        <div class="det-info">
+          <div class="det-ttl">${esc(r.title)}</div>
+          <div class="det-tags">
+            ${r.category ? `<span class="tag tag-cat">${esc(r.category)}</span>` : ''}
+            ${r.servings  ? `<span class="tag tag-srv">👥 ${r.servings}人前</span>` : ''}
+            ${r.cookTime  ? `<span class="tag tag-time">⏱ ${r.cookTime}分</span>` : ''}
+          </div>
+        </div>
+        <div class="proud-wrap">
+          <div class="proud-bubble">わたしが考えた<br>レシピなのよ♪</div>
+          ${kiri('proud', 120)}
+        </div>
+      </div>
+    </div>
+
+    <div class="det-body">
+      <div class="dsec">
+        <div class="dsec-ttl">🛒 材料</div>
+        ${ings}
+      </div>
+      <div class="dsec">
+        <div class="dsec-ttl">👩‍🍳 作り方</div>
+        ${steps}
+      </div>
+      ${r.memo ? `
+      <div class="dsec">
+        <div class="dsec-ttl">📝 メモ・コツ</div>
+        <p class="memo-txt">${esc(r.memo)}</p>
+      </div>` : ''}
+    </div>
+
+    <div class="char-corner">
+      <div class="corner-bubble">${tip}</div>
+      ${kiri('cooking',68)}
+    </div>
+
+    <div class="det-actions">
+      <button class="btn btn-ghost" onclick="go('form',{id:${r.id}})">✏️ 編集</button>
+      <button class="btn btn-danger" onclick="cfmDel(${r.id})">🗑️ 削除</button>
+    </div>
+    <div class="sp8"></div>
+  </div>`;
+}
+
+/* ==========================================
+   PAGE: FORM (add / edit)
+   ========================================== */
+function pgForm() {
+  const r = S.editId ? getR(S.editId) : null;
+  const ings = r?.ingredients?.length ? r.ingredients : [{name:'',amount:''},{name:'',amount:''}];
+  const stps = r?.steps?.filter(s=>s.trim()).length ? r.steps.filter(s=>s.trim()) : ['',''];
+
+  const catOpts = CATS.slice(1).map(c=>
+    `<option value="${c.id}" ${r?.category===c.id?'selected':''}>${c.e} ${c.l}</option>`
+  ).join('');
+
+  const ingHTML = ings.map((ing,i)=>`
+    <div class="ing-irow" id="ir-${i}">
+      <input type="text" class="finp ing-n" placeholder="材料名（例：にんじん）" value="${esc(ing.name)}">
+      <input type="text" class="finp ing-a" placeholder="量（例：1本）" value="${esc(ing.amount)}">
+      <button class="del-btn" onclick="this.parentElement.remove()">✕</button>
+    </div>`).join('');
+
+  const stpHTML = stps.map((s,i)=>`
+    <div class="step-irow" id="sr-${i}">
+      <div class="step-nb">${i+1}</div>
+      <textarea class="ftxt" placeholder="手順${i+1}を入力…" oninput="growTxt(this)">${esc(s)}</textarea>
+      <button class="del-btn" onclick="this.parentElement.remove();renumSteps()">✕</button>
+    </div>`).join('');
+
+  const bubble = r
+    ? 'このレシピをもっと\n美味しくアップデートしようにゃ！✏️'
+    : '新しいレシピを追加するにゃ！\nどんな料理かな？🐾';
+
+  return `<div class="page">
+    <div class="form-hdr">
+      ${kiri(r?'happy':'welcome',62)}
+      <div class="bubble" style="font-size:12.5px;">${bubble.replace('\n','<br>')}</div>
+    </div>
+
+    <div class="form-body">
+      <div class="fg">
+        <label class="flbl">🍽️ レシピ名 <span class="req">* 必須</span></label>
+        <input type="text" class="finp" id="f-ttl" placeholder="例：肉じゃが"
+          value="${esc(r?.title||'')}" maxlength="60">
+      </div>
+
+      <div class="fg">
+        <label class="flbl">🏷️ カテゴリ</label>
+        <select class="fsel" id="f-cat">${catOpts}</select>
+      </div>
+
+      <div class="frow">
+        <div class="fg">
+          <label class="flbl">👥 人数</label>
+          <input type="number" class="finp" id="f-srv" placeholder="4"
+            value="${r?.servings||''}" min="1" max="99">
+        </div>
+        <div class="fg">
+          <label class="flbl">⏱ 調理時間（分）</label>
+          <input type="number" class="finp" id="f-time" placeholder="30"
+            value="${r?.cookTime||''}" min="1" max="999">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="flbl">🛒 材料</label>
+        <div class="ing-list" id="ing-list">${ingHTML}</div>
+        <button class="add-row" onclick="addIng()">＋ 材料を追加</button>
+      </div>
+
+      <div class="fg">
+        <label class="flbl">👩‍🍳 作り方</label>
+        <div class="step-list" id="step-list">${stpHTML}</div>
+        <button class="add-row" onclick="addStep()">＋ 手順を追加</button>
+      </div>
+
+      <div class="fg">
+        <label class="flbl">📝 メモ・コツ（任意）</label>
+        <textarea class="ftxt" id="f-memo"
+          placeholder="調理のコツ、アレンジ方法、家族の好みなど…"
+          oninput="growTxt(this)">${esc(r?.memo||'')}</textarea>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="goBack()">キャンセル</button>
+        <button class="btn btn-primary" style="flex:2;" onclick="submitForm()">
+          ${r ? '✅ 更新する' : '💾 保存する'}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ==========================================
+   FORM HELPERS
+   ========================================== */
+function addIng() {
+  const list = document.getElementById('ing-list');
+  const row = document.createElement('div');
+  row.className = 'ing-irow';
+  row.innerHTML = `
+    <input type="text" class="finp ing-n" placeholder="材料名">
+    <input type="text" class="finp ing-a" placeholder="量">
+    <button class="del-btn" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(row);
+  row.querySelector('.ing-n').focus();
+}
+
+function addStep() {
+  const list = document.getElementById('step-list');
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'step-irow';
+  row.innerHTML = `
+    <div class="step-nb">${idx}</div>
+    <textarea class="ftxt" placeholder="手順${idx}を入力…" oninput="growTxt(this)"></textarea>
+    <button class="del-btn" onclick="this.parentElement.remove();renumSteps()">✕</button>`;
+  list.appendChild(row);
+  row.querySelector('textarea').focus();
+}
+
+function renumSteps() {
+  document.querySelectorAll('#step-list .step-nb').forEach((el,i)=>{ el.textContent=i+1; });
+  document.querySelectorAll('#step-list textarea').forEach((el,i)=>{ el.placeholder=`手順${i+1}を入力…`; });
+}
+
+function growTxt(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function collectForm() {
+  const title = document.getElementById('f-ttl')?.value.trim();
+  if (!title) { toast('レシピ名を入力してちょうだい！🐱'); return null; }
+
+  const ings = Array.from(document.querySelectorAll('#ing-list .ing-irow'))
+    .map(row=>({ name: row.querySelector('.ing-n')?.value.trim()||'', amount: row.querySelector('.ing-a')?.value.trim()||'' }))
+    .filter(i=>i.name);
+
+  const steps = Array.from(document.querySelectorAll('#step-list textarea'))
+    .map(el=>el.value.trim()).filter(Boolean);
+
+  return {
+    title,
+    category: document.getElementById('f-cat')?.value || 'その他',
+    servings: parseInt(document.getElementById('f-srv')?.value)||null,
+    cookTime: parseInt(document.getElementById('f-time')?.value)||null,
+    ingredients: ings,
+    steps,
+    memo: document.getElementById('f-memo')?.value.trim()||'',
+  };
+}
+
+function submitForm() {
+  const data = collectForm();
+  if (!data) return;
+  if (S.editId) {
+    updR(S.editId, data);
+    toast('✅ レシピを更新したわ！');
+    S.detId = S.editId;
+    go('detail', {id: S.editId});
+  } else {
+    const r = addR(data);
+    toast('💾 レシピを保存したわよ！');
+    S.detId = r.id;
+    go('detail', {id: r.id});
+  }
+}
+
+/* ==========================================
+   ACTIONS
+   ========================================== */
+function hdSearch(val) {
+  S.q = val;
+  const clr = document.querySelector('.s-clr');
+  if (clr) clr.classList.toggle('on', !!val);
+  const f = filtered();
+  const list = document.getElementById('card-list');
+  if (list) {
+    list.innerHTML = f.length
+      ? f.map(rCard).join('')
+      : emptyState(
+          val?'sad':'thinking',
+          val?`「${esc(val)}」は見つからなかったわ😢`:'まだレシピがないのよ！',
+          val?'別のキーワードで試してみてちょうだい。\n材料名でも検索できるんだから！':'最初のレシピを追加してちょうだいね🐱',
+          !val?`<button class="btn btn-primary" onclick="go('form')">＋ レシピを追加</button>`:''
+        );
+    const cnt = document.querySelector('.list-cnt');
+    if (cnt) cnt.textContent = f.length ? `${f.length}件のレシピ` : '';
+  }
+}
+
+function clrSearch() {
+  S.q = '';
+  const el = document.getElementById('s-inp');
+  if (el) el.value = '';
+  hdSearch('');
+}
+
+function setCat(cat) {
+  S.cat = cat;
+  if (S.page==='list') render();
+}
+
+function hdFav(id) {
+  const isFav = togFav(id);
+  const btn = document.getElementById('fav-hdr');
+  if (btn) btn.textContent = isFav ? '❤️' : '🤍';
+  toast(isFav ? '❤️ お気に入りに追加したわ！' : '🤍 お気に入りから外したわ');
+}
+
+function hdCardFav(id, e) {
+  e.stopPropagation();
+  const isFav = togFav(id);
+  const btn = e.currentTarget;
+  btn.textContent = isFav ? '❤️' : '🤍';
+  btn.style.transform = 'scale(1.5)';
+  setTimeout(()=>{ btn.style.transform=''; }, 220);
+  toast(isFav ? '❤️ お気に入りに追加したわ！' : '🤍 お気に入りから外したわ');
+  const hdrBtn = document.getElementById('fav-hdr');
+  if (hdrBtn) hdrBtn.textContent = isFav ? '❤️' : '🤍';
+}
+
+function cfmDel(id) {
+  const r = getR(id);
+  if (!r) return;
+  document.getElementById('m-ttl').textContent = 'レシピを削除する？';
+  document.getElementById('m-desc').textContent = `「${r.title}」を削除します。この操作は元に戻せません。`;
+  document.getElementById('m-ok').onclick = ()=>{
+    delR(id); closeModal();
+    toast('🗑️ レシピを削除したわ');
+    go('list');
+  };
+  document.getElementById('modal-bg').classList.add('on');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('on');
+}
+
+/* ==========================================
+   SHARED HTML HELPERS
+   ========================================== */
+function rCard(r) {
+  const ce = CAT_E[r.category] || '🍽️';
+  return `<div class="rcard" onclick="go('detail',{id:${r.id}})">
+    <div class="card-ico">${ce}</div>
+    <div class="card-body">
+      <div class="card-ttl">${esc(r.title)}</div>
+      <div class="tags">
+        ${r.category ? `<span class="tag tag-cat">${esc(r.category)}</span>` : ''}
+        ${r.cookTime  ? `<span class="tag tag-time">⏱ ${r.cookTime}分</span>` : ''}
+        ${r.servings  ? `<span class="tag tag-srv">👥 ${r.servings}人前</span>` : ''}
+      </div>
+    </div>
+    <button class="fav-btn" onclick="hdCardFav(${r.id},event)">${r.isFavorite?'❤️':'🤍'}</button>
+  </div>`;
+}
+
+function emptyState(pose, ttl, desc, action='') {
+  return `<div class="empty">
+    ${kiri(pose,96)}
+    <div class="empty-ttl">${ttl}</div>
+    <div class="empty-desc">${desc.replace('\n','<br>')}</div>
+    ${action}
+  </div>`;
+}
+
+/* ==========================================
+   UTILS
+   ========================================== */
+/* ==========================================
+   EXPORT / IMPORT
+   ========================================== */
+function exportData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    recipes: S.recipes,
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const date = new Date().toLocaleDateString('ja-JP').replace(/\//g, '-');
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `きりねこキッチン_${date}.json`,
+  });
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📤 書き出し完了だわ！LINEやAirDropで送ってちょうだい');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const incoming = Array.isArray(data) ? data : (data.recipes || []);
+      if (!incoming.length) { toast('⚠️ レシピデータが見つからなかったわ'); return; }
+
+      // 重複しないIDのレシピだけ追加（既存IDはスキップ）
+      const existingIds = new Set(S.recipes.map(r => r.id));
+      const newOnes = incoming.filter(r => !existingIds.has(r.id));
+      const dupCount = incoming.length - newOnes.length;
+
+      S.recipes = [...S.recipes, ...newOnes];
+      save();
+      input.value = '';
+
+      let msg = `📥 ${newOnes.length}件のレシピを追加したわ！`;
+      if (dupCount > 0) msg += `（重複${dupCount}件はスキップ）`;
+      toast(msg);
+      render();
+    } catch {
+      toast('⚠️ ファイルが読み込めなかったわ。JSONか確認してちょうだい');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>el.classList.remove('on'), 2600);
+}
+
+/* ==========================================
+   BOOT
+   ========================================== */
+load();
+render();
+</script>
+</body>
+</html>
