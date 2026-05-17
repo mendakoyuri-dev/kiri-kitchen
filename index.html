@@ -440,7 +440,10 @@
     }
     .del-btn:active { transform: scale(.88); }
     .step-irow .del-btn { margin-top: 11px; }
-    /* 並び替えボタン */
+    /* 並び替えボタン（手順・材料共通） */
+    .ing-sort {
+      display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
+    }
     .step-sort {
       display: flex; flex-direction: column; gap: 3px;
       flex-shrink: 0; margin-top: 8px;
@@ -1132,12 +1135,7 @@ function pgForm() {
     `<option value="${c.id}" ${r?.category===c.id?'selected':''}>${c.e} ${c.l}</option>`
   ).join('');
 
-  const ingHTML = ings.map((ing,i)=>`
-    <div class="ing-irow" id="ir-${i}">
-      <input type="text" class="finp ing-n" placeholder="材料名（例：にんじん）" value="${esc(ing.name)}">
-      <input type="text" class="finp ing-a" placeholder="量（例：1本）" value="${esc(ing.amount)}">
-      <button class="del-btn" onclick="this.parentElement.remove()">✕</button>
-    </div>`).join('');
+  const ingHTML = ings.map((ing,i)=> ingRowHTML(ing.name, ing.amount, i===0, i===ings.length-1)).join('');
 
   const stpHTML = stps.map((s,i)=> stepRowHTML(i, s, i===0, i===stps.length-1)).join('');
 
@@ -1210,14 +1208,52 @@ function pgForm() {
    ========================================== */
 function addIng() {
   const list = document.getElementById('ing-list');
-  const row = document.createElement('div');
-  row.className = 'ing-irow';
-  row.innerHTML = `
-    <input type="text" class="finp ing-n" placeholder="材料名">
-    <input type="text" class="finp ing-a" placeholder="量">
-    <button class="del-btn" onclick="this.parentElement.remove()">✕</button>`;
-  list.appendChild(row);
-  row.querySelector('.ing-n').focus();
+  if (list.children.length > 0)
+    list.lastElementChild.querySelector('.sort-btn:last-of-type').disabled = false;
+  const div = document.createElement('div');
+  div.innerHTML = ingRowHTML('', '', list.children.length === 0, true);
+  list.appendChild(div.firstElementChild);
+  list.lastElementChild.querySelector('.ing-n').focus();
+}
+
+function ingRowHTML(name='', amount='', isFirst=false, isLast=false) {
+  return `<div class="ing-irow">
+    <div class="ing-sort">
+      <button class="sort-btn" onclick="moveIng(this,-1)" ${isFirst?'disabled':''} title="上へ">▲</button>
+      <button class="sort-btn" onclick="moveIng(this,1)"  ${isLast ?'disabled':''} title="下へ">▼</button>
+    </div>
+    <input type="text" class="finp ing-n" placeholder="材料名（例：にんじん）" value="${name}">
+    <input type="text" class="finp ing-a" placeholder="量（例：1本）" value="${amount}">
+    <button class="del-btn" onclick="this.parentElement.remove();renumIngs()">✕</button>
+  </div>`;
+}
+
+function moveIng(btn, dir) {
+  const row = btn.closest('.ing-irow');
+  const list = document.getElementById('ing-list');
+  const rows = [...list.children];
+  const idx = rows.indexOf(row);
+  const target = rows[idx + dir];
+  if (!target) return;
+  const an = row.querySelector('.ing-n'), aa = row.querySelector('.ing-a');
+  const bn = target.querySelector('.ing-n'), ba = target.querySelector('.ing-a');
+  [an, aa, bn, ba].forEach(el => { el.style.transition='opacity .15s'; el.style.opacity='0'; });
+  setTimeout(() => {
+    const tmpN = an.value, tmpA = aa.value;
+    an.value = bn.value; aa.value = ba.value;
+    bn.value = tmpN;    ba.value = tmpA;
+    [an, aa, bn, ba].forEach(el => el.style.opacity='1');
+    renumIngs();
+  }, 150);
+}
+
+function renumIngs() {
+  const rows = [...document.querySelectorAll('#ing-list .ing-irow')];
+  rows.forEach((row, i) => {
+    const [up, down] = row.querySelectorAll('.sort-btn');
+    up.disabled   = (i === 0);
+    down.disabled = (i === rows.length - 1);
+  });
 }
 
 function stepRowHTML(i, val='', isFirst=false, isLast=false) {
