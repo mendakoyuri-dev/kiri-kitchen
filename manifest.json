@@ -1,0 +1,21 @@
+{
+  "name": "きりねこキッチン",
+  "short_name": "きりねこ",
+  "description": "家族みんなのレシピノート",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EDE7F6",
+  "theme_color": "#9575CD",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
