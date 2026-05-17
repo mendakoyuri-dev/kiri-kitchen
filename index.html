@@ -606,19 +606,29 @@
    DATA
    ========================================== */
 const CATS = [
-  { id:'all',    e:'🍽️', l:'すべて'    },
-  { id:'メイン', e:'🥘', l:'メイン'    },
-  { id:'主菜',   e:'🍖', l:'主菜'      },
-  { id:'副菜',   e:'🥗', l:'副菜'      },
-  { id:'汁物',   e:'🍲', l:'汁物・スープ'},
-  { id:'スイーツ',e:'🍰',l:'スイーツ'  },
-  { id:'朝食',   e:'🍳', l:'朝食'      },
-  { id:'お弁当', e:'🍱', l:'お弁当'    },
-  { id:'ドリンク',e:'🥤',l:'ドリンク'  },
-  { id:'その他', e:'✨', l:'その他'    },
+  { id:'all',      e:'🍽️', l:'すべて',       img: null },
+  { id:'メイン',   e:'🥘', l:'メイン',       img:'icon-cat-main.png' },
+  { id:'主菜',     e:'🍖', l:'主菜',         img:'icon-cat-shusai.png' },
+  { id:'副菜',     e:'🥗', l:'副菜',         img:'icon-cat-fukusai.png' },
+  { id:'汁物',     e:'🍲', l:'汁物・スープ', img:'icon-cat-soup.png' },
+  { id:'スイーツ', e:'🍰', l:'スイーツ',     img:'icon-cat-sweets.png' },
+  { id:'朝食',     e:'🍳', l:'朝食',         img:'icon-cat-breakfast.png' },
+  { id:'お弁当',   e:'🍱', l:'お弁当',       img:'icon-cat-bento.png' },
+  { id:'ドリンク', e:'🥤', l:'ドリンク',     img:'icon-cat-drink.png' },
+  { id:'その他',   e:'✨', l:'その他',       img:'icon-cat-other.png' },
 ];
 function allCats() { return [...CATS, ...S.customCats]; }
 function getCatE(id) { return allCats().find(c=>c.id===id)?.e || '🍽️'; }
+function getCatIcon(id, size=54) {
+  const cat = allCats().find(c=>c.id===id);
+  if (cat?.img) {
+    return `<img src="./images/${cat.img}" width="${size}" height="${size}"
+      style="object-fit:contain;border-radius:0;"
+      onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${cat?.e||'🍽️'}',style:'font-size:${Math.round(size*.55)}px;line-height:1;'}))"
+      alt="${id}">`;
+  }
+  return `<span style="font-size:${Math.round(size*.55)}px;line-height:1;">${cat?.e||'🍽️'}</span>`;
+}
 
 const SAMPLES = [
   {
@@ -1033,7 +1043,7 @@ function pgDetail() {
   return `<div class="page">
     <div class="det-hero">
       <div class="det-main-row">
-        <div class="det-ico">${ce}</div>
+        <div class="det-ico">${getCatIcon(r.category, 60)}</div>
         <div class="det-info">
           <div class="det-ttl">${esc(r.title)}</div>
           <div class="det-tags">
@@ -1321,7 +1331,7 @@ function closeModal() {
 function rCard(r) {
   const ce = getCatE(r.category);
   return `<div class="rcard" onclick="go('detail',{id:${r.id}})">
-    <div class="card-ico">${ce}</div>
+    <div class="card-ico">${getCatIcon(r.category, 42)}</div>
     <div class="card-body">
       <div class="card-ttl">${esc(r.title)}</div>
       <div class="tags">
